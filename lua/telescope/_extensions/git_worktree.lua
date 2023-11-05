@@ -85,25 +85,6 @@ end
 
 local create_input_prompt = function(cb)
 
-    --[[
-    local window = Window.centered({
-        width = 30,
-        height = 1
-    })
-    vim.api.nvim_buf_set_option(window.bufnr, "buftype", "prompt")
-    vim.fn.prompt_setprompt(window.bufnr, "Worktree Location: ")
-    vim.fn.prompt_setcallback(window.bufnr, function(text)
-        vim.api.nvim_win_close(window.win_id, true)
-        vim.api.nvim_buf_delete(window.bufnr, {force = true})
-        cb(text)
-    end)
-
-    vim.api.nvim_set_current_win(window.win_id)
-    vim.fn.schedule(function()
-        vim.nvim_command("startinsert")
-    end)
-    --]]
-    --
 
     local subtree = vim.fn.input("Path to subtree > ")
     cb(subtree)
@@ -134,8 +115,6 @@ local create_worktree = function(opts)
                 end)
             end)
 
-        -- do we need to replace other default maps?
-
         return true
     end
     require("telescope.builtin").git_branches(opts)
@@ -162,13 +141,7 @@ local telescope_git_worktree = function(opts)
         if entry.sha ~= "(bare)" then
             local index = #results + 1
             for key, val in pairs(widths) do
-                if key == 'path' then
-                    local new_path = utils.transform_path(opts, entry[key])
-                    local path_len = strings.strdisplaywidth(new_path or "")
-                    widths[key] = math.max(val, path_len)
-                else
-                    widths[key] = math.max(val, strings.strdisplaywidth(entry[key] or ""))
-                end
+                widths[key] = math.max(val, strings.strdisplaywidth(entry[key] or ""))
             end
 
             table.insert(results, index, entry)
